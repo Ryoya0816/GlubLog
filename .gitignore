@@ -1,0 +1,3 @@
+phpmyadmin/sessions/*
+phpmyadmin/tmp/*
+.DS_Store
