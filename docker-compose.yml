@@ -3,23 +3,28 @@ version: '3.8'
 
 # コンテナ群の記述
 services:
-  # nginxというサービス
+  # =======================
+  # Nginx
+  # =======================
   nginx:
     # コンテナ名指定
     container_name: curriculum-nginx
     # 使用イメージの指定
     image: nginx:latest
-    # 同期ファイルの指定
+    # ホストと同期するディレクトリ
     volumes:
-      - ./docker/nginx:/etc/nginx/conf.d
-      - ./app:/var/www/html
+      - ./docker/nginx:/etc/nginx/conf.d   # Nginx設定
+      - ./app:/var/www/html                # Laravel同期
     # 使用ポートの指定
     ports:
       - "80:80"
-    # 依存関係の指定 (指定したコンテナより後に立ち上がる)
+    # 依存関係
     depends_on:
       - php
 
+  # =======================
+  # PHP (Laravel本体)
+  # =======================
   php:
     container_name: curriculum-laravel
     ###############################################################
@@ -27,26 +32,30 @@ services:
     platform: linux/x86_64
     ###############################################################
     
-    # どれを使ってビルド(コンテナ立ち上げを行うか)
+    # どれを使ってビルドするか
     build:
       # ディレクトリの指定
       context: ./
       # 使用するDockerfile名の指定
       dockerfile: docker/php/Dockerfile
+    # ホストと同期するディレクトリ
     volumes:
-    - ./app:/var/www/html
-    - ./docker/php/check_startup.sh:/tmp/check_startup.sh
+      - ./app:/var/www/html                   # Laravel同期
+      - ./docker/php/check_startup.sh:/tmp/check_startup.sh
     # サーバーに対してオープンするポートを指定
     expose:
       - "9000"
     depends_on:
       - db
 
+  # =======================
+  # MySQL
+  # =======================
   db:
     container_name: curriculum-db
     platform: linux/x86_64
     image: mysql:5.7
-    # コンテナの環境変数を指定
+    # コンテナの環境変数
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: laravel
@@ -57,22 +66,23 @@ services:
       - ./db:/var/lib/mysql
     restart: always
     ports:
-      - 3306:3306
+      - "3306:3306"
 
-
+  # =======================
+  # phpMyAdmin
+  # =======================
   phpMyAdmin:
     container_name: curriculum-phpmyadmin
     platform: linux/x86_64
     image: phpmyadmin/phpmyadmin
     environment:
       - PMA_ARBITRARY=1
-      - PMA_HOST=db
+      - PMA_HOST=curriculum-db
       - PMA_USER=root
       - PMA_PASSWORD=root
-    # コンテナの関連を指定
-    links:
+    depends_on:
       - db
     ports:
-      - 4040:80
+      - "4040:80"
     volumes:
       - ./phpmyadmin/sessions:/sessions

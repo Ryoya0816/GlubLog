@@ -1,3 +1,15 @@
-phpmyadmin/sessions/*
-phpmyadmin/tmp/*
+/vendor/
+/node_modules/
+/public/storage
+/storage/*.key
+/.env
+/.env.*
+/storage/logs/*
+/storage/framework/*
+/bootstrap/cache/*
+/composer.lock
+/npm-debug.log
+yarn.lock
 .DS_Store
+.idea
+.vscode
